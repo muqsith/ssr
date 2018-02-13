@@ -40,8 +40,6 @@ const config = {
     },
     plugins: [
         new HtmlWebpackPlugin({
-            template: path.resolve(__dirname, 'src', 'index.html'),
-            //template: 'http://localhost:8123/',
             chunks: ['app']
         }),
         new ExtractTextPlugin('main.css'),
