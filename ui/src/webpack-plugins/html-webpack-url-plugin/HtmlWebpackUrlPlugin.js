@@ -13,6 +13,9 @@ HtmlWebpackUrlPlugin.prototype.apply = function(compiler) {
                 .then((_html) => {
                     htmlPluginData.html = _html;
                     callback(null, htmlPluginData);
+                })
+                .catch((err) => {
+                    callback(err);
                 });
         });
 
