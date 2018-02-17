@@ -4,8 +4,7 @@ const path = require('path'),
     UglifyJsPlugin = require('uglifyjs-webpack-plugin'),
     CopyWebpackPlugin = require('copy-webpack-plugin'),
     WEBPACK_MODE = process.env.npm_lifecycle_event,
-
-    HtmlWebpackUrlPlugin = require('./src/webpack-plugins/html-webpack-url-plugin/HtmlWebpackUrlPlugin.js')
+    HtmlWebpackUrlPlugin = require('html-webpack-url-plugin')
     ;
 
 const config = {
