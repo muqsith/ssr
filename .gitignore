@@ -1,6 +1,9 @@
 server/node_modules/
 server/dist/
 
+server1/node_modules/
+server1/dist/
+
 
 ui/node_modules/
 ui/public/
