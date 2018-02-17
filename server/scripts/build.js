@@ -10,19 +10,13 @@ const path = require('path'),
     Promise = require('bluebird')
     ;
 
-const dist = path.resolve(__dirname, '..', 'dist'),
-    public = path.resolve(__dirname, '..', 'public'),
-    client = path.resolve(__dirname, '..', 'client'),
-    appjs = path.resolve(__dirname, '..', 'app.js')
-    ;
-
-function rm_dist() {
+function rm_dir(dirPath) {
     return (
         new Promise((resolve, reject) => {
-            if (!fs.existsSync(dist)) {
+            if (!fs.existsSync(dirPath)) {
                 resolve();
             } else {
-                rimraf(dist, (err) => {
+                rimraf(dirPath, (err) => {
                     if (err) {
                         reject(err);
                     } else {
@@ -34,13 +28,13 @@ function rm_dist() {
     );
 }
 
-function create_dist() {
+function create_dir(dirPath) {
     return (
         new Promise((resolve, reject) => {
-            if (fs.existsSync(dist)) {
+            if (fs.existsSync(dirPath)) {
                 resolve();
             } else {
-                mkdirp(dist, (err) => {
+                mkdirp(dirPath, (err) => {
                     if (err) {
                         reject(err);
                     } else {
@@ -52,24 +46,52 @@ function create_dist() {
     );
 }
 
-function copy_dirs() {
+function copy_dirs(optsArray) {
     return (
         new Promise((resolve, reject) => {
-            fs.copy(public, dist)
-            .then(() => {
-                return fs.copy(client, dist);
-            })
-            .then(resolve)
-            .catch(reject)
-            ;
+            if (Array.isArray(optsArray) && optsArray.length > 0) {
+                const _itr = (_arr) => {
+                    let opts = _arr.shift();
+                    if (opts) {
+                        if (fs.existsSync(opts.dest)) {
+                            fs.copy(opts.src, opts.dest)
+                            .then(() => {
+                                _itr(_arr);
+                            })
+                            .catch((err) => {
+                                reject(err);
+                            })
+                        } else {
+                            create_dir(opts.dest)
+                            .then(() => {
+                                fs.copy(opts.src, opts.dest)
+                                .then(() => {
+                                    _itr(_arr);
+                                })
+                                .catch((err) => {
+                                    reject(err);
+                                })
+                            })
+                            .catch((err) => {
+                                reject(err);
+                            })
+                        }
+                    } else {
+                        resolve();
+                    }
+                }
+                _itr(optsArray);
+            } else {
+                reject(new Error('Empty options for copy_dirs'));
+            }
         })
     );
 }
 
-function babilify() {
+function babilify(filePath) {
     return (
         new Promise((resolve, reject) => {
-            babel.transformFile(appjs, (err, result) => {
+            babel.transformFile(filePath, (err, result) => {
                 if (err) {
                     reject(err);
                 } else {
@@ -80,10 +102,10 @@ function babilify() {
     );
 }
 
-function create_indexjs(code) {
+function create_file(code, filePath) {
     return (
         new Promise((resolve, reject) => {
-            fs.writeFile(path.resolve(dist, 'index.js'), code, {
+            fs.writeFile(filePath, code, {
                 encoding: 'utf8'
             }, (err) => {
                 if (err) {
@@ -97,23 +119,32 @@ function create_indexjs(code) {
 }
 
 if (require.main === module) {
+    let dist = path.resolve(__dirname, '..', 'dist'),
+        public = path.resolve(__dirname, '..', 'public'),
+        client = path.resolve(__dirname, '..', 'client'),
+        appjs = path.resolve(__dirname, '..', 'app.js'),
+        indexjs = path.resolve(__dirname, '..', 'dist', 'index.js')
+        ;
     console.log('Removing dist ...');
-    rm_dist()
+    rm_dir(dist)
     .then(() => {
         console.log('Creating dist ...');
-        return create_dist();
+        return create_dir(dist);
     })
     .then(() => {
         console.log('Compiling JS ...');
-        return babilify();
+        return babilify(appjs);
     })
     .then((result) => {
         console.log('Writing generated code ... ');
-        return create_indexjs(result.code);
+        return create_file(result.code, indexjs);
     })
     .then(() => {
         console.log('Copying folders to dist ...');
-        return copy_dirs();
+        return copy_dirs([
+            {src: public, dest: path.resolve(dist, 'public')},
+            {src: client, dest: path.resolve(dist, 'client')},
+        ]);
     })
     .catch((err) => {
         console.log(err);
