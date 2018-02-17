@@ -6,7 +6,7 @@
   "scripts": {
     "start": "nodemon app.js --exec babel-node",
     "build": "scripts/build.js",
-    "serve": "node dist/app.js",
+    "serve": "node dist/index.js",
     "test": "mocha --require babel-core/register"
   },
   "author": "",

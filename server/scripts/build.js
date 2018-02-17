@@ -80,6 +80,22 @@ function babilify() {
     );
 }
 
+function create_indexjs(code) {
+    return (
+        new Promise((resolve, reject) => {
+            fs.writeFile(path.resolve(dist, 'index.js'), code, {
+                encoding: 'utf8'
+            }, (err) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve();
+                }
+            })
+        })
+    );
+}
+
 if (require.main === module) {
     console.log('Removing dist ...');
     rm_dist()
@@ -90,6 +106,10 @@ if (require.main === module) {
     .then(() => {
         console.log('Compiling JS ...');
         return babilify();
+    })
+    .then((result) => {
+        console.log('Writing generated code ... ');
+        return create_indexjs(result.code);
     })
     .then(() => {
         console.log('Copying folders to dist ...');
