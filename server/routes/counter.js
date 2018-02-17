@@ -1,16 +1,3 @@
-import path from 'path';
-import Express from 'express';
-import React from 'react';
-import { createStore } from 'redux';
-import { Provider } from 'react-redux';
-import counterApp from '../client/reducers';
-import App from '../client/containers/App';
-import { renderToString } from 'react-dom/server';
-
-const app = Express();
-const port = 3000;
-
-app.use('/static', Express.static('static'));
 app.use(handleRender);
 
 function handleRender(req, res) {
@@ -50,5 +37,3 @@ function renderFullPage(html, preloadedState) {
     </html>
     `;
 }
-
-app.listen(port);

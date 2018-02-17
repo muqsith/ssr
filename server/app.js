@@ -1,18 +1,18 @@
-const path = require('path'),
-    express = require('express'),
-    app = express(),
-    bodyParser = require('body-parser'),
-    PORT = 8123
-    ;
+import path from 'path';
+import express from 'express';
+import bodyParser from 'body-parser';
+
+const app = express();
+const PORT = 8123;
 
 app.use(bodyParser.urlencoded({ extended: false }));
 
-app.get('/api', (req, res) => {
-    res.send(`Hello World`);
+app.use('/public', express.static(path.resolve(__dirname, 'public')));
+
+app.listen(PORT, (err) => {
+    if (err) {
+      console.log(err);
+    } else {
+      console.log(`Listening at http://localhost:${PORT}`);
+    }
 });
-
-app.use(express.static(path.resolve(__dirname, 'public')));
-
-app.listen(PORT, () => {
-    console.log(`Listening at http://localhost:${PORT}`);
-})
